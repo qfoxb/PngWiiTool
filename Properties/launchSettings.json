@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "PngWiiTool": {
+      "commandName": "Project",
+      "commandLineArgs": "test.png test.png_wii"
+    }
+  }
+}
