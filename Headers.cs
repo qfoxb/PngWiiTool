@@ -1,4 +1,5 @@
-﻿namespace PngWiiTool
+// The following file is from the Nautilus toolkit. Namespace modified. Subject to LICENSE in THIRDPARTY/Nautilus/LICENSE
+namespace PngWiiTool
 {
     public class ImageHeaders
     {
