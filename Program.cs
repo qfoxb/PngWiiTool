@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
-using System.Drawing;
-using System.IO.Compression;
+using System.Runtime.InteropServices;
 namespace PngWiiTool
 {
     internal class Program
@@ -9,28 +8,44 @@ namespace PngWiiTool
         {
             if (args.Length == 0)
             {
-                Console.WriteLine("PngWiiTool v0.1 written by qfoxb\nUsage: PngWiiTool <input.png> <output.png_wii>");
+                Console.WriteLine("PngWiiTool v0.2 written by qfoxb\nUsage: PngWiiTool <input.png> <output.png_wii>");
                 return;
             }
             if (args.Length == 2)
             {
                 string inputPng = args[0];
                 string outputPngWii = args[1];
-                
 
-                // Convert PNG to TPL
-                if (File.Exists("wimgt.exe"))
+
+                // detect if wimgt is present
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) 
+                {
+                    if (!File.Exists("wimgt.exe"))
+                    {
+                        Console.WriteLine("wimgt.exe not found. Please place wimgt.exe in the same directory as PngWiiTool.");
+                        return;
+                    }
+                } else
+                {
+                    if (!File.Exists("wimgt"))
+                    {
+                        Console.WriteLine("wimgt not found. Please place wimgt in the same directory as PngWiiTool.");
+                        return;
+                    }
+                }
+                // convert file to tpl using wimgt
                 {
                     var tplfile = inputPng+ ".tpl";
                     var wimgtArgs = "-d \"" + tplfile + "\" ENC -x TPL.CMPR \"" + inputPng + "\""; // Source: https://github.com/trojannemo/Nautilus/blob/master/Nautilus/NemoTools.cs
                     var Headers = new ImageHeaders(); // Source: https://github.com/trojannemo/Nautilus/blob/master/Nautilus/NemoTools.cs
-                    Process.Start(new ProcessStartInfo("wimgt.exe")
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     {
-                        Arguments = wimgtArgs,
-                       // UseShellExecute = false,
-                        //CreateNoWindow = true,
-
-                    });
+                        Process.Start("wimgt.exe", wimgtArgs).WaitForExit();
+                    } else
+                    {
+                        Process.Start("wimgt", wimgtArgs).WaitForExit();
+                    }   
+                    // convert tpl to png_wii by cramming headers into the tpl file
                    // Code between these comments is from Nautilus. Source: https://github.com/trojannemo/Nautilus/blob/master/Nautilus/NemoTools.cs
                    var binaryReader = new BinaryReader(File.OpenRead(tplfile));
                     var binaryWriter = new BinaryWriter(new FileStream(outputPngWii, FileMode.Create));
